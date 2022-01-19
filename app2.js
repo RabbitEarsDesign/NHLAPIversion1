@@ -1,21 +1,12 @@
-// 1) get all players info [done]
-// 2) create array of player name and id [done]
-// 3) if localStorage.getItem('playerArr') === undefined
-// 4) then localStorage.setItem('playerArr', playerArr) [done]
-// 5) When user searches a name get the playerArr and loop over it to find the corresponding id [done]
-// 6) Multiple players could match so create searchedPlayerArr and push and ID that corespond with search [done]
-// 7) Loop over serachPlayerArr and fetch each ID [done]
-// 8) push each player onto an array [done]
-// 9) output that array to the screen [done]
+// 1) First check if local storage is set with an array of all players and their respective ID (we will use this to search based on ID later)
+// 2) If local storage is not already set then call getRoster() which will return the array of players and ID's
+// 3) getRoster() awaits the result of creating the roster by calling createRoster()
+// 4)
 
-// const DUMMY_DATA = [
-//   { fullName: "John Doe", id: 1 },
-//   { fullName: "John Doe", id: 2 },
-//   { fullName: "Peter Jackson", id: 2 },
-//   { fullName: "Steve Smith", id: 3 },
-// ];
+// setLS with roster
+setLS();
 
-// Get elements to work with
+// Get elements
 const searchForm = document.getElementById("searchForm");
 const output = document.getElementById("output");
 
@@ -29,9 +20,7 @@ searchForm.addEventListener("submit", (e) => {
     (player) => player.fullName.toUpperCase() === query.toUpperCase()
   );
 
-  // const searchedPlayers = getLS(query);
-
-  getSpecificPlayer(searchedPlayers);
+  getPlayersByQuery(searchedPlayers);
 });
 
 // Get array of player with respective ID from local storage
@@ -45,16 +34,16 @@ function getLS() {
 }
 
 // Get specific players and output to screen
-async function getSpecificPlayer(searchedPlayers) {
+async function getPlayersByQuery(searchedPlayers) {
   if (searchedPlayers.length > 0) {
-    let html;
+    let html = "";
     for (const player of searchedPlayers) {
       const res = await fetch(
         `https://statsapi.web.nhl.com/api/v1/people/${player.id}`
       );
       const data = await res.json();
       const person = data.people[0];
-      console.log(person);
+
       html += `<div class="card">
       <div class="card-top">
         <div class="number">
@@ -104,9 +93,31 @@ async function getSpecificPlayer(searchedPlayers) {
     output.innerText = "No player found";
   }
 }
-// BREAK
 
-async function createPlayerArray() {
+// SET LS WITH ROSTER
+function setLS() {
+  if (localStorage.getItem("playerArr")) {
+    console.log("Roster already stored");
+    return;
+  } else {
+    console.log("storing data...");
+    getRoster().then((res) => {
+      setTimeout(
+        () => localStorage.setItem("playerArr", JSON.stringify(res)),
+        2000
+      );
+    });
+  }
+}
+
+// GET ROSTER
+async function getRoster() {
+  const roster = await createRoster();
+  return roster;
+}
+
+// CREATE THE ROSTER - the roster is an array of players fullName and respecitve ID
+async function createRoster() {
   const playerArr = localStorage.getItem("playerArr");
 
   const res = await fetch("https://statsapi.web.nhl.com/api/v1/teams");
@@ -134,25 +145,3 @@ async function createPlayerArray() {
   });
   return rosterArr;
 }
-
-async function getRoster() {
-  const roster = await createPlayerArray();
-  return roster;
-}
-
-function setLS() {
-  if (localStorage.getItem("playerArr")) {
-    console.log("Roster already stored");
-    return;
-  } else {
-    console.log("storing data...");
-    getRoster().then((res) => {
-      setTimeout(
-        () => localStorage.setItem("playerArr", JSON.stringify(res)),
-        2000
-      );
-    });
-  }
-}
-
-setLS();

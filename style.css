@@ -12,6 +12,30 @@ body {
   flex-direction: column;
 }
 
+/* FORM */
+#searchForm {
+  background: #ccc;
+  padding: 2rem;
+  border-radius: 5px;
+  width: 90%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+#searchForm input,
+#searchForm button {
+  border: none;
+  border-radius: 2px;
+  padding: 10px 15px;
+}
+
+#searchForm input {
+  width: 50%;
+}
+
+#searchForm button {
+}
+
 #output {
   display: flex;
   justify-content: center;
