@@ -1,7 +1,11 @@
 // 1) First check if local storage is set with an array of all players and their respective ID (we will use this to search based on ID later)
 // 2) If local storage is not already set then call getRoster() which will return the array of players and ID's
 // 3) getRoster() awaits the result of creating the roster by calling createRoster()
-// 4)
+// 4) getRoster() return a promise such that we can set its result to localStorage
+// 5) When the user searches a name we get the array from localStorage and filter for all names that match the query
+// 6) We then loop over and array of all relevent names and fetch their resective data by ID
+// 7) as we fetch each player by ID we append a template literal with the applicable data to the html variable
+// 8) Output the html to the screen using the element we grabbed at the beginning (output)
 
 // setLS with roster
 setLS();
