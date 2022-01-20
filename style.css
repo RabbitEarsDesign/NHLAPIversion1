@@ -23,7 +23,8 @@ body {
 }
 
 #searchForm input,
-#searchForm button {
+#searchForm button,
+#searchForm select {
   border: none;
   border-radius: 2px;
   padding: 10px 15px;
@@ -31,9 +32,6 @@ body {
 
 #searchForm input {
   width: 50%;
-}
-
-#searchForm button {
 }
 
 #output {
@@ -93,4 +91,9 @@ body {
 .card-bottom .card-bottom-stats .stat p {
   font-size: 1.6rem;
   font-weight: bold;
+}
+
+.cardTeam {
+  width: 100px;
+  height: 75px;
 }

@@ -128,14 +128,17 @@ async function createRoster() {
   const data = await res.json();
   // Loop over array of team objs and
   let arrOfTeamIds = [];
+  console.log(data.teams);
   data.teams.forEach((team) => {
-    arrOfTeamIds.push(team.id);
+    arrOfTeamIds.push({ name: team.name, id: team.id });
   });
 
+  localStorage.setItem("teamArr", JSON.stringify(arrOfTeamIds));
+
   let rosterArr = [];
-  arrOfTeamIds.forEach(async (id) => {
+  arrOfTeamIds.forEach(async (team) => {
     const res = await fetch(
-      `https://statsapi.web.nhl.com/api/v1/teams/${id}/roster`
+      `https://statsapi.web.nhl.com/api/v1/teams/${team.id}/roster`
     );
     const data = await res.json();
 

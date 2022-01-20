@@ -8,53 +8,84 @@
 // 8) push each player onto an array [done]
 // 9) output that array to the screen [done]
 
-// const DUMMY_DATA = [
-//   { fullName: "John Doe", id: 1 },
-//   { fullName: "John Doe", id: 2 },
-//   { fullName: "Peter Jackson", id: 2 },
-//   { fullName: "Steve Smith", id: 3 },
-// ];
+// INIT
+setLS();
 
-// Get elements to work with
+// Get elements
 const searchForm = document.getElementById("searchForm");
 const output = document.getElementById("output");
+const dropdown = document.getElementById("dropdown");
 
 // Listen for submit and capture user query
 searchForm.addEventListener("submit", (e) => {
   e.preventDefault();
-  const query = e.target[0].value;
-  const allPlayers = JSON.parse(localStorage.getItem("playerArr"));
+  const query = e.target[1].value;
 
-  let searchedPlayers = allPlayers.filter(
-    (player) => player.fullName.toUpperCase() === query.toUpperCase()
-  );
+  if (query.trim().length > 0) {
+    // If searching players call getPlayers() else call getTeam()
+    switch (e.target[0].value) {
+      // GET team
+      case "team":
+        const teamArr = JSON.parse(localStorage.getItem("teamArr"));
 
-  // const searchedPlayers = getLS(query);
+        let currentTeam = teamArr.filter(
+          (team) => team.name.toUpperCase() === query.toUpperCase()
+        );
 
-  getSpecificPlayer(searchedPlayers);
+        getTeam(currentTeam);
+      // GET players
+      case "players":
+        const playersArr = JSON.parse(localStorage.getItem("playerArr"));
+
+        let searchedPlayers = playersArr.filter(
+          (player) => player.fullName.toUpperCase() === query.toUpperCase()
+        );
+
+        getPlayers(searchedPlayers);
+
+      default:
+        return;
+    }
+  } else {
+    output.innerText = "Search cannot be empty";
+  }
 });
 
-// Get array of player with respective ID from local storage
-function getLS() {
-  const allPlayers = JSON.parse(localStorage.getItem("playerArr"));
-  console.log(allPlayers);
-  let searchedPlayers = allPlayers.filter(
-    (player) => player.fullName.toUpperCase() === query.toUpperCase()
-  );
-  return searchedPlayers;
+// get specific team and output to screen
+async function getTeam(searchedTeam) {
+  if (searchedTeam.length === 1) {
+    let html = "";
+
+    const res = await fetch(
+      `https://statsapi.web.nhl.com/api/v1/teams/${searchedTeam[0].id}/roster`
+    );
+    const data = await res.json();
+    html += `<h2>${searchedTeam[0].name}</h2>`;
+
+    for (let i = 0; i < data.roster.length; i++) {
+      console.log(data.roster[i]);
+      html += `
+       <p class="cardTeam"><a>${data.roster[i].person.fullName}</a></p>
+          `;
+    }
+
+    output.innerHTML = html;
+  } else {
+    output.innerText = "No team found";
+  }
 }
 
 // Get specific players and output to screen
-async function getSpecificPlayer(searchedPlayers) {
+async function getPlayers(searchedPlayers) {
   if (searchedPlayers.length > 0) {
-    let html;
+    let html = "";
     for (const player of searchedPlayers) {
       const res = await fetch(
         `https://statsapi.web.nhl.com/api/v1/people/${player.id}`
       );
       const data = await res.json();
       const person = data.people[0];
-      console.log(person);
+
       html += `<div class="card">
       <div class="card-top">
         <div class="number">
@@ -104,42 +135,10 @@ async function getSpecificPlayer(searchedPlayers) {
     output.innerText = "No player found";
   }
 }
-// BREAK
 
-async function createPlayerArray() {
-  const playerArr = localStorage.getItem("playerArr");
+// SET LS ON INIT
 
-  const res = await fetch("https://statsapi.web.nhl.com/api/v1/teams");
-  const data = await res.json();
-  // Loop over array of team objs and
-  let arrOfTeamIds = [];
-  data.teams.forEach((team) => {
-    arrOfTeamIds.push(team.id);
-  });
-
-  let rosterArr = [];
-  arrOfTeamIds.forEach(async (id) => {
-    const res = await fetch(
-      `https://statsapi.web.nhl.com/api/v1/teams/${id}/roster`
-    );
-    const data = await res.json();
-
-    data.roster.forEach((player) => {
-      const newPlayer = {
-        fullName: player.person.fullName,
-        id: player.person.id,
-      };
-      rosterArr.push(newPlayer);
-    });
-  });
-  return rosterArr;
-}
-
-async function getRoster() {
-  const roster = await createPlayerArray();
-  return roster;
-}
-
+// SET LS WITH ROSTER
 function setLS() {
   if (localStorage.getItem("playerArr")) {
     console.log("Roster already stored");
@@ -155,4 +154,41 @@ function setLS() {
   }
 }
 
-setLS();
+// GET ROSTER
+async function getRoster() {
+  const roster = await createRoster();
+  return roster;
+}
+
+// CREATE THE ROSTER - the roster is an array of players fullName and respecitve ID
+async function createRoster() {
+  const playerArr = localStorage.getItem("playerArr");
+
+  const res = await fetch("https://statsapi.web.nhl.com/api/v1/teams");
+  const data = await res.json();
+  // Loop over array of team objs and
+  let arrOfTeamIds = [];
+
+  data.teams.forEach((team) => {
+    arrOfTeamIds.push({ name: team.name, id: team.id });
+  });
+
+  localStorage.setItem("teamArr", JSON.stringify(arrOfTeamIds));
+
+  let rosterArr = [];
+  arrOfTeamIds.forEach(async (team) => {
+    const res = await fetch(
+      `https://statsapi.web.nhl.com/api/v1/teams/${team.id}/roster`
+    );
+    const data = await res.json();
+
+    data.roster.forEach((player) => {
+      const newPlayer = {
+        fullName: player.person.fullName,
+        id: player.person.id,
+      };
+      rosterArr.push(newPlayer);
+    });
+  });
+  return rosterArr;
+}

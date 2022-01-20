@@ -8,15 +8,18 @@
     <title>NHL API Search v1</title>
   </head>
   <body>
+    <p>Search any current NHL player or team by full name</p>
+    <small>Try: 'Sebastian Aho' for players</small>
+    <small>Try: 'New Jersey Devils' for teams</small>
     <form id="searchForm">
-      <input
-        type="text"
-        name=""
-        placeholder="Search any current NHL player by full name"
-      />
+      <select name="" id="dropdown">
+        <option value="players">Players</option>
+        <option value="team">Team</option>
+      </select>
+      <input type="text" name="" placeholder="Search players or teams" />
       <button type="submit">Submit</button>
     </form>
     <div id="output"></div>
-    <script src="app2.js"></script>
+    <script src="app.js"></script>
   </body>
 </html>
