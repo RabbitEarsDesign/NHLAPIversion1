@@ -140,8 +140,8 @@ async function getPlayers(searchedPlayers) {
 
 // SET LS WITH ROSTER
 function setLS() {
-  if (localStorage.getItem("playerArr")) {
-    console.log("Roster already stored");
+  if (localStorage.getItem("playerArr") && localStorage.getItem("teamArr")) {
+    console.log("Rosters already stored");
     return;
   } else {
     console.log("storing data...");
